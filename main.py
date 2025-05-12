@@ -27,6 +27,7 @@ def parse_resume(text):
         '- full_name (string, e.g., "John Doe")\n'
         '- email_address (string, e.g., "john.doe@example.com")\n'
         '- phone_number (string, e.g., "+1 123 456 7890")\n'
+        '- location (list of objects with keys "country" and "city", e.g., [{ "country": "United States", "city": "New York" }, { "country": "Germany", "city": "Berlin" }])\n'
         '- linkedin_profile_url (string, e.g., "https://www.linkedin.com/in/johndoe/")\n'
         '- skills (list of strings, e.g., ["Python", "TensorFlow", "Communication"])\n'
         '- previous_job_titles (list of strings, e.g., ["Software Engineer", "Data Scientist"])\n'
@@ -38,12 +39,12 @@ def parse_resume(text):
         '- masters_degree_program (string, e.g., "Data Science")\n'
         '- masters_gpa (float, e.g., 3.4)\n'
         '- languages (list of objects with keys "language" and "proficiency_level", where "proficiency_level" can only be one of the following values: "Elementary", "Working", "Fluent", "Native", or "" e.g., [{"language": "French", "proficiency_level": "Native"}, {"language": "English", "proficiency_level": "Working"}])\n'
-        f'Resume text:\n{text[:3500]}'
+        f'Resume text:\n{text}'
     )
 
     try:
         response = openai.ChatCompletion.create(
-            model='gpt-4',
+            model=os.getenv('OPENAI_MODEL'),
             messages=[
                 {'role': 'system', 'content': 'You return structured JSON from resumes. Under no circumstances should you return anything other than valid JSON.'},
                 {'role': 'user', 'content': prompt}
