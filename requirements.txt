@@ -23,6 +23,7 @@ pydantic_core==2.33.2
 PyMuPDF==1.25.5
 pypdfium2==4.30.1
 python-dotenv==1.1.0
+python-multipart==0.0.20
 sniffio==1.3.1
 starlette==0.46.2
 tqdm==4.67.1
