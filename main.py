@@ -33,7 +33,7 @@ MAX_CHARACTERS = 5000
 def parse_resume(text):
     prompt = (
         "You are a resume parser. Extract the following features in JSON format:\n"
-        "If a value can't be found or inferred from the resume, use "" for strings, -1 for integers and floats, and [] for lists.\n"
+        "If a value can't be found or inferred from the resume, use \"\" for strings, -1 for integers and floats, and [] for lists.\n"
         "- full_name (string, e.g., \"John Doe\")\n"
         "- email_address (string, e.g., \"john.doe@example.com\")\n"
         "- phone_number (string, e.g., \"+1 123 456 7890\")\n"
@@ -48,7 +48,7 @@ def parse_resume(text):
         "- bachelors_gpa (float, e.g., 3.8)\n"
         "- masters_degree_program (string, e.g., \"Data Science\")\n"
         "- masters_gpa (float, e.g., 3.4)\n"
-        "- languages (list of objects with keys \"language\" and \"proficiency_level\", where \"proficiency_level\" can only be one of the following values: \"Elementary\", \"Working\", \"Fluent\", \"Native\", or \" e.g., [{\"language\": \"French\", \"proficiency_level\": \"Native\"}, {\"language\": \"English\", \"proficiency_level\": \"Working\"}])\n"
+        "- languages (list of objects with keys \"language\" and \"proficiency_level\", where \"proficiency_level\" must be one of the following values: \"Elementary\", \"Working\", \"Fluent\", \"Native\", \"\" e.g., [{\"language\": \"French\", \"proficiency_level\": \"Native\"}, {\"language\": \"English\", \"proficiency_level\": \"Working\"}])\n"
         f"Resume text:\n{text[:MAX_CHARACTERS]}"
     )
 
@@ -62,6 +62,8 @@ def parse_resume(text):
             temperature=0
         )
         return json.loads(response.choices[0].message.content)
+    except json.JSONDecodeError as e:
+        return {"error": f"Unable to decode OpenAI response as JSON: {str(e)}"}
     except Exception as e:
         return {"error": str(e)}
     
@@ -102,14 +104,14 @@ async def upload_resumes(resumes: list[UploadFile] = File(...)):
         with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
             text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
 
-        data = parse_resume(text)
+        extracted = parse_resume(text)
 
         image = extract_image(file_bytes)
 
-        data.update({
+        extracted.update({
             "filename": file.filename,
             "image": image
         })
-        results.append(data)
+        results.append(extracted)
 
     return {"results": results}
